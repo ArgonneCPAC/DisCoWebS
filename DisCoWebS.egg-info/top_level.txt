@@ -1,6 +1,5 @@
 DisCoWebS
 build
-data
 data_loader
 likelihood
 optimizer

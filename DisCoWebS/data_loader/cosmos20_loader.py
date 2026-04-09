@@ -1,4 +1,5 @@
-""" Author: Andrew P. Hearin """
+"""Author: Andrew P. Hearin"""
+
 """Module implements the `load_cosmos20` function"""
 
 import os

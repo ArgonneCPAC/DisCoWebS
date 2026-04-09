@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: DisCoWebS
-Version: 0.1.dev4+gd9800d882.d20260406
+Version: 0.1.dev7+ga77f1d3c8.d20260409
 Summary: Diffsky joint modelling of Cosmos-Web and SDSS data
 Author-email: Kaustav Mitra <kmitra@anl.gov>, Natália Villa Nova Rodrigues <nvillanovarodrigues@anl.gov>, Andrew Hearin <ahearin@anl.gov>, Kumail Zaidi <kzaidi@anl.gov>
 License: BSD 3-Clause License
@@ -38,6 +38,7 @@ Project-URL: home, https://github.com/ArgonneCPAC/DisCoWebS
 Classifier: Programming Language :: Python :: 3
 Requires-Python: >=3.11
 Description-Content-Type: text/x-rst
+License-File: LICENSE
 License-File: LICENSE.rst
 Requires-Dist: numpy
 Requires-Dist: jax

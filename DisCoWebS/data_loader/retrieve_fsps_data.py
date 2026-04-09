@@ -1,4 +1,5 @@
 """Use python-fsps to retrieve a block of Simple Stellar Population (SSP) data"""
+
 import numpy as np
 
 try:

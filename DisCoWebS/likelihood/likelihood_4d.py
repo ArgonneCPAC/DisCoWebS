@@ -9,6 +9,12 @@ from diffsky import signdhist
 from diffsky.param_utils import diffsky_param_wrapper_merging as dpwm
 from jax import jit as jjit
 from functools import partial
+from .likelihood_kernel import (
+    mse_loss,
+    log_mse_loss,
+    ln_poisson_loss,
+)
+
 
 def bin_cosmos_data_m_i_c1_c2(
     cosmos,
@@ -82,10 +88,9 @@ def bin_cosmos_data_m_i_c1_c2(
         ]
 
         n_mag = len(cosmos_mag_colnames)
-        for mi in range(n_mag):
-            cosmos_subset_cut = cosmos_subset_cut[
-                (cosmos_subset_cut[cosmos_mag_colnames[mi]] < 25.0)
-            ]
+        cosmos_subset_cut = cosmos_subset_cut[
+            (cosmos_subset_cut[cosmos_mag_colnames[i_i]] < 25.0)
+        ]
 
         for mi in range(n_mag):
             if mi <= n_mag - 2:
@@ -228,7 +233,6 @@ def bin_cosmos_data_m_i_c1_c2(
     )
 
 
-
 def bin_sdss_data_m_i_c1_c2(
     sdss,
     sdss_mag_colnames,
@@ -245,9 +249,7 @@ def bin_sdss_data_m_i_c1_c2(
     ndsig_by_dbin,
 ):
     sky_area = 8000.0  # sdss.SKY_AREA
-    z_bins = np.linspace(
-        np.min(sdss["z"]), np.max(sdss["z"]), N_z_bins + 1
-    )
+    z_bins = np.linspace(np.min(sdss["z"]), np.max(sdss["z"]), N_z_bins + 1)
     i_i = sdss_mag_colnames.index("modelMag_r")
 
     lc_data_all = []
@@ -296,15 +298,12 @@ def bin_sdss_data_m_i_c1_c2(
 
         sdss_subset = sdss[(sdss["z"] >= z_min) & (sdss["z"] < z_max)]
 
-        sdss_subset_cut = sdss[
-            (sdss["z"] >= z_min) & (sdss["z"] < z_max)
-        ]
+        sdss_subset_cut = sdss[(sdss["z"] >= z_min) & (sdss["z"] < z_max)]
 
         n_mag = len(sdss_mag_colnames)
-        for mi in range(n_mag):
-            sdss_subset_cut = sdss_subset_cut[
-                (sdss_subset_cut[sdss_mag_colnames[mi]] < 17.5)
-            ]
+        sdss_subset_cut = sdss_subset_cut[
+            (sdss_subset_cut[sdss_mag_colnames[i_i]] < 17.5)
+        ]
 
         for mi in range(n_mag):
             if mi <= n_mag - 2:
@@ -447,12 +446,9 @@ def bin_sdss_data_m_i_c1_c2(
     )
 
 
-
-@partial(jjit, static_argnames=["N_z_bins",
-                                "i_i",
-                                "n_mag",
-                                "mode",
-                                "norm"])
+@partial(
+    jjit, static_argnames=["N_z_bins", "i_i", "n_mag", "mode", "loss_type", "norm"]
+)
 def m_i_c1_c2_loss(
     params_u,
     sed_key,
@@ -467,12 +463,14 @@ def m_i_c1_c2_loss(
     n_mag,
     params_b_fixed,
     mode="fit_all",
-    norm = 1.0,
+    loss_type="log_mse_loss",
+    norm=1.0,
 ):
     N_z_bins = int(N_z_bins)
     i_i = int(i_i)
     n_mag = int(n_mag)
     mode = str(mode)
+    loss_type = str(loss_type)
     norm = float(norm)
 
     kk = 0
@@ -512,17 +510,11 @@ def m_i_c1_c2_loss(
             ssperr_params=params_b_fixed.ssperr_params,
         )
     elif mode == "fix_diffstarpop":
-        params_bounded._replace(
-            diffstarpop_params=params_b_fixed.diffstarpop_params
-        )
+        params_bounded._replace(diffstarpop_params=params_b_fixed.diffstarpop_params)
     elif mode == "fix_ssperr":
-        params_bounded._replace(
-            ssperr_params=params_b_fixed.ssperr_params
-        )
+        params_bounded._replace(ssperr_params=params_b_fixed.ssperr_params)
     elif mode == "fix_merging":
-        params_bounded._replace(
-            merging_params=params_b_fixed.merging_params
-        )
+        params_bounded._replace(merging_params=params_b_fixed.merging_params)
     elif mode == "fix_diffstarpop_merging":
         params_bounded._replace(
             diffstarpop_params=params_b_fixed.diffstarpop_params,
@@ -606,15 +598,25 @@ def m_i_c1_c2_loss(
                 M_c_max_,
             )
 
-            eps = 1e-1  # to avoid log(0) issues
-
-            sum_1 = sum_1 + jnp.mean(
-                (jnp.log10(M_c_pred_ + eps) - jnp.log10(M_c_data_ + eps))
-                * (jnp.log10(M_c_pred_ + eps) - jnp.log10(M_c_data_ + eps))
-            )
+            if loss_type == "log_mse_loss":
+                eps = 1e-1  # to avoid log(0) issues
+                sum_1 = sum_1 + log_mse_loss(M_c_data_, M_c_pred_, eps)
+            elif loss_type == "mse_loss":
+                sum_1 = sum_1 + mse_loss(M_c_data_, M_c_pred_, eps)
+            elif loss_type == "ln_poisson_loss":
+                eps = 1e-3  # to avoid log(0) issues
+                sum_1 = sum_1 + ln_poisson_loss(M_c_data_, M_c_pred_, eps)
+            else:
+                valid_modes = [
+                    "log_mse_loss",
+                    "mse_loss",
+                    "ln_poisson_loss",
+                ]
+                raise ValueError(
+                    "Invalid loss_type. Choose from the following:"
+                    + "\n".join(f" - {m}" for m in valid_modes)
+                )
 
             kk = kk + 1
 
-    return sum_1 / (1.0 * kk) / norm
-
-
+    return sum_1 / norm

@@ -1,8 +1,4 @@
-import numpy as np
-import jax.numpy as jnp
 from jax import random as jran
-from dsps.cosmology import DEFAULT_COSMOLOGY
-from diffstar.defaults import FB
 from diffsky.param_utils import diffsky_param_wrapper_merging as dpwm
 from jax import jit as jjit
 import optax
@@ -12,6 +8,7 @@ from functools import partial
 from ..likelihood.likelihood_4d import m_i_c1_c2_loss
 from ..likelihood.likelihood_4d import bin_cosmos_data_m_i_c1_c2
 from ..likelihood.likelihood_4d import bin_sdss_data_m_i_c1_c2
+
 
 def initialize_parameters(init_mode="initial", params_u=None, learn_rate=1e-1):
     if init_mode == "initial":
@@ -36,13 +33,19 @@ def initialize_parameters(init_mode="initial", params_u=None, learn_rate=1e-1):
     return params_u, opt_state, optimizer
 
 
-@partial(jjit, static_argnames=["optimizer",
-                                "i_i",
-                                "n_mag",
-                                "N_z_bins",
-                                "loss_function",
-                                "mode",
-                                "norm"])
+@partial(
+    jjit,
+    static_argnames=[
+        "optimizer",
+        "i_i",
+        "n_mag",
+        "N_z_bins",
+        "loss_function",
+        "mode",
+        "loss_type",
+        "norm",
+    ],
+)
 def train_step(
     params_u,
     opt_state,
@@ -60,6 +63,7 @@ def train_step(
     params_b_fixed,
     loss_function,
     mode="fit_all",
+    loss_type="log_mse_loss",
     norm=1.0,
 ):
     """
@@ -72,6 +76,7 @@ def train_step(
     n_mag = int(n_mag)
     N_z_bins = int(N_z_bins)
     mode = str(mode)
+    loss_type = str(loss_type)
     norm = float(norm)
 
     loss_value, grads = value_and_grad(loss_function)(
@@ -88,6 +93,7 @@ def train_step(
         n_mag,
         params_b_fixed,
         mode=mode,
+        loss_type=loss_type,
         norm=norm,
     )
 
@@ -118,6 +124,7 @@ def one_loop_optimization(
     loss_function,
     num_steps=100,
     mode="fit_all",
+    loss_type="log_mse_loss",
     norm=1.0,
 ):
     """
@@ -129,6 +136,7 @@ def one_loop_optimization(
     n_mag = int(n_mag)
     N_z_bins = int(N_z_bins)
     mode = str(mode)
+    loss_type = str(loss_type)
     norm = float(norm)
 
     for step in range(num_steps):
@@ -149,6 +157,7 @@ def one_loop_optimization(
             params_b_fixed,
             loss_function,
             mode=mode,
+            loss_type=loss_type,
             norm=norm,
         )
         if step == 0:
@@ -165,10 +174,13 @@ def multi_loop_optimization(
     params_u,
     opt_state,
     optimizer,
-    cosmos_mag_colnames,
+    data_mag_colnames,
     params_b_fixed,
     loss_function,
-    cosmos,
+    data,
+    i_i,
+    n_mag,
+    bin_data_m_i_c1_c2,
     N_z_bins,
     N_host_min,
     N_host_max,
@@ -182,19 +194,19 @@ def multi_loop_optimization(
     num_loops=10,
     num_steps_per_loop=100,
     mode="fit_all",
+    loss_type="log_mse_loss",
     norm=1.0,
 ):
     """
     Perform multiple loops of optimization
     and return the best parameters and loss value.
     """
-    i_i = cosmos_mag_colnames.index("HSC_i_MAG")
-    n_mag = len(cosmos_mag_colnames)
 
     i_i = int(i_i)
     n_mag = int(n_mag)
     N_z_bins = int(N_z_bins)
     mode = str(mode)
+    loss_type = str(loss_type)
     norm = float(norm)
 
     best_params_u = params_u
@@ -218,9 +230,9 @@ def multi_loop_optimization(
             M_c_min_all,
             M_c_max_all,
             n_gal_all,
-        ) = bin_cosmos_data_m_i_c1_c2(
-            cosmos,
-            cosmos_mag_colnames,
+        ) = bin_data_m_i_c1_c2(
+            data,
+            data_mag_colnames,
             N_z_bins,
             N_host_min,
             N_host_max,
@@ -257,6 +269,7 @@ def multi_loop_optimization(
             params_b_fixed,
             loss_function,
             mode=mode,
+            loss_type=loss_type,
             norm=norm,
         )
 
@@ -278,6 +291,7 @@ def multi_loop_optimization(
             loss_function,
             num_steps=num_steps_per_loop,
             mode=mode,
+            loss_type=loss_type,
             norm=norm,
         )
 
@@ -299,9 +313,9 @@ def multi_loop_optimization(
     return params_bf_bounded, best_loss
 
 
-def run_optimization(
-    cosmos,
-    cosmos_mag_colnames,
+def run_optimization_1data(
+    data,
+    data_mag_colnames,
     N_z_bins,
     N_host_min,
     N_host_max,
@@ -315,33 +329,98 @@ def run_optimization(
     num_steps_per_loop=100,
     modes=["fix_diffstarpop_merging", "fix_diffstarpop", "fit_all"],
     data_to_use="cosmos",
+    loss_type="log_mse_loss",
 ):
     """
     Run the optimization process.
     """
     ran_key = jran.key(0)
 
-    if data_to_use == "cosmos":
-        params_u, opt_state, optimizer = initialize_parameters(
-            init_mode="initial", learn_rate=1e-1
-        )
+    params_u, opt_state, optimizer = initialize_parameters(
+        init_mode="initial", learn_rate=1e-1
+    )
 
-        params_bf_bounded = dpwm.DEFAULT_PARAM_COLLECTION
-        (
-            ran_key,
-            lc_data_all,
-            M_c_data_all,
-            ndsig_M_c_pred_all,
-            M_c_min_all,
-            M_c_max_all,
-            n_gal_all,
-        ) = bin_cosmos_data_m_i_c1_c2(
-            cosmos,
-            cosmos_mag_colnames,
+    if data_to_use == "cosmos":
+        bin_data_m_i_c1_c2 = bin_cosmos_data_m_i_c1_c2
+        i_i = data_mag_colnames.index("HSC_i_MAG")
+    elif data_to_use == "sdss":
+        bin_data_m_i_c1_c2 = bin_sdss_data_m_i_c1_c2
+        i_i = data_mag_colnames.index("modelMag_r")
+    else:
+        raise ValueError("Invalid data_to_use. Choose 'cosmos' or 'sdss'.")
+
+    params_bf_bounded = dpwm.DEFAULT_PARAM_COLLECTION
+    (
+        ran_key,
+        lc_data_all,
+        M_c_data_all,
+        ndsig_M_c_pred_all,
+        M_c_min_all,
+        M_c_max_all,
+        n_gal_all,
+    ) = bin_data_m_i_c1_c2(
+        data,
+        data_mag_colnames,
+        N_z_bins,
+        N_host_min,
+        N_host_max,
+        params_bf_bounded,
+        n_z_phot_table,
+        ssp_data,
+        tcurves,
+        ran_key,
+        N_mag_bins,
+        N_color_bins,
+        ndsig_by_dbin,
+    )
+
+    n_mag = len(data_mag_colnames)
+
+    ran_key, sed_key = jran.split(ran_key, 2)
+
+    init_loss = m_i_c1_c2_loss(
+        params_u,
+        sed_key,
+        n_gal_all,
+        lc_data_all,
+        M_c_data_all,
+        ndsig_M_c_pred_all,
+        M_c_min_all,
+        M_c_max_all,
+        N_z_bins,
+        i_i,
+        n_mag,
+        params_b_fixed=params_bf_bounded,
+        mode="fit_all",
+        loss_type=loss_type,
+        norm=1.0,
+    )
+
+    norm = init_loss * 1.0
+    norm = float(norm)
+
+    print("Initial Loss:  1.00 ")
+
+    for opt_loop in range(len(modes)):
+        mode = modes[opt_loop]
+        print(f"Optimization {opt_loop + 1}/{len(modes)}, mode: {mode}")
+
+        params_b_fixed = params_bf_bounded
+
+        params_bf_bounded, best_loss = multi_loop_optimization(
+            params_u,
+            opt_state,
+            optimizer,
+            data_mag_colnames,
+            params_b_fixed,
+            m_i_c1_c2_loss,
+            data,
+            i_i,
+            n_mag,
+            bin_data_m_i_c1_c2,
             N_z_bins,
             N_host_min,
             N_host_max,
-            params_bf_bounded,
             n_z_phot_table,
             ssp_data,
             tcurves,
@@ -349,72 +428,20 @@ def run_optimization(
             N_mag_bins,
             N_color_bins,
             ndsig_by_dbin,
+            num_loops=num_loops,
+            num_steps_per_loop=num_steps_per_loop,
+            mode=mode,
+            loss_type=loss_type,
+            norm=norm,
         )
 
-        i_i = cosmos_mag_colnames.index("HSC_i_MAG")
-        n_mag = len(cosmos_mag_colnames)
-
-        ran_key, sed_key = jran.split(ran_key, 2)
-
-        init_loss = m_i_c1_c2_loss(
-            params_u,
-            sed_key,
-            n_gal_all,
-            lc_data_all,
-            M_c_data_all,
-            ndsig_M_c_pred_all,
-            M_c_min_all,
-            M_c_max_all,
-            N_z_bins,
-            i_i,
-            n_mag,
-            params_b_fixed=params_bf_bounded,
-            mode="fit_all",
-            norm = 1.0,
+        params_u = dpwm.get_u_param_collection_from_param_collection(
+            params_bf_bounded.diffstarpop_params,
+            params_bf_bounded.mzr_params,
+            params_bf_bounded.spspop_params,
+            params_bf_bounded.scatter_params,
+            params_bf_bounded.ssperr_params,
+            params_bf_bounded.merging_params,
         )
-
-        norm = init_loss * 1.0
-        norm = float(norm)
-
-        print("Initial Loss:  1.00 ")
-
-        for opt_loop in range(len(modes)):
-            mode = modes[opt_loop]
-            print(f"Optimization {opt_loop + 1}/{len(modes)}, mode: {mode}")
-
-            params_b_fixed = params_bf_bounded
-
-            params_bf_bounded, best_loss = multi_loop_optimization(
-                params_u,
-                opt_state,
-                optimizer,
-                cosmos_mag_colnames,
-                params_b_fixed,
-                m_i_c1_c2_loss,
-                cosmos,
-                N_z_bins,
-                N_host_min,
-                N_host_max,
-                n_z_phot_table,
-                ssp_data,
-                tcurves,
-                ran_key,
-                N_mag_bins,
-                N_color_bins,
-                ndsig_by_dbin,
-                num_loops=num_loops,
-                num_steps_per_loop=num_steps_per_loop,
-                mode=mode,
-                norm=norm,
-            )
-
-            params_u = dpwm.get_u_param_collection_from_param_collection(
-                params_bf_bounded.diffstarpop_params,
-                params_bf_bounded.mzr_params,
-                params_bf_bounded.spspop_params,
-                params_bf_bounded.scatter_params,
-                params_bf_bounded.ssperr_params,
-                params_bf_bounded.merging_params,
-            )
 
     return params_bf_bounded, best_loss

@@ -239,4 +239,3 @@ def get_color_outlier_mask(sdss, mag_names, p_cut=0.5):
 
 def apply_ra_cuts(sdss, ra_min=100, ra_max=250):
     return sdss[(sdss["ra"] > ra_min) & (sdss["ra"] < ra_max)]
-

@@ -1,9 +1,11 @@
 """Globals storing defaults for various DSPS options"""
+
 import typing
 import numpy as np
 
 
-DEFAULT_SSP_BNAME = "ssp_data_fsps_v3.2_lgmet_age.h5"
+# DEFAULT_SSP_BNAME = "ssp_data_fsps_v3.2_lgmet_age.h5"
+DEFAULT_SSP_BNAME = "fsps_v0.4.7_mist_c3k_a_kroupa_wNE_logGasU-2.0_logGasZ0.0.h5"
 
 
 class SSPData(typing.NamedTuple):

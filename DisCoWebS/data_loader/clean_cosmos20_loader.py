@@ -1,5 +1,6 @@
 from . import cosmos20_loader as c20
 
+
 def get_clean_cosmos20_data():
     cosmos_all = c20.load_cosmos20()
     cosmos = c20.apply_nan_cuts(cosmos_all)
@@ -12,4 +13,3 @@ def get_clean_cosmos20_data():
     cosmos = cosmos[msk_is_not_hsc_outlier & msk_is_not_uvista_outlier]
 
     return cosmos
-
