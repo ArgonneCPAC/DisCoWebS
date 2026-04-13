@@ -1,5 +1,2 @@
 DisCoWebS
-build
-data_loader
-likelihood
-optimizer
+tests

@@ -620,3 +620,74 @@ def m_i_c1_c2_loss(
             kk = kk + 1
 
     return sum_1 / norm
+
+
+@partial(
+    jjit,
+    static_argnames=[
+        # "n_gal_all_combined",
+        # "lc_data_all_combined",
+        # "M_c_data_all_combined",
+        # "ndsig_M_c_pred_all_combined",
+        # "M_c_min_all_combined",
+        # "M_c_max_all_combined",
+        "N_z_bins",
+        "i_i_combined",
+        "n_mag_combined",
+        "mode",
+        "loss_type",
+        "norm",
+    ],
+)
+def m_i_c1_c2_loss_multi_data(
+    params_u,
+    sed_key,
+    n_gal_all_combined,
+    lc_data_all_combined,
+    M_c_data_all_combined,
+    ndsig_M_c_pred_all_combined,
+    M_c_min_all_combined,
+    M_c_max_all_combined,
+    N_z_bins,
+    i_i_combined,
+    n_mag_combined,
+    params_b_fixed,
+    mode="fit_all",
+    loss_type="log_mse_loss",
+    norm=1.0,
+):
+    mode = str(mode)
+    loss_type = str(loss_type)
+    norm = float(norm)
+    total_loss = 0.0
+    for di in range(len(n_gal_all_combined)):
+        n_gal_all = n_gal_all_combined[di]
+        lc_data_all = lc_data_all_combined[di]
+        M_c_data_all = M_c_data_all_combined[di]
+        ndsig_M_c_pred_all = ndsig_M_c_pred_all_combined[di]
+        M_c_min_all = M_c_min_all_combined[di]
+        M_c_max_all = M_c_max_all_combined[di]
+        N_z_bin = int(N_z_bins[di])
+        i_i = int(i_i_combined[di])
+        n_mag = int(n_mag_combined[di])
+
+        loss_di = m_i_c1_c2_loss(
+            params_u,
+            sed_key,
+            n_gal_all,
+            lc_data_all,
+            M_c_data_all,
+            ndsig_M_c_pred_all,
+            M_c_min_all,
+            M_c_max_all,
+            N_z_bin,
+            i_i,
+            n_mag,
+            params_b_fixed,
+            mode=mode,
+            loss_type=loss_type,
+            norm=norm,
+        )
+        total_loss = total_loss + loss_di
+
+    return total_loss
