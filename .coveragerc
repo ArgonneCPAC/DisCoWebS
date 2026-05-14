@@ -1,0 +1,7 @@
+[run]
+source= DisCoWebS/
+
+omit =
+    DisCoWebS/__init__.py
+    DisCoWebS/_version.py
+    DisCoWebS/tests/*.py

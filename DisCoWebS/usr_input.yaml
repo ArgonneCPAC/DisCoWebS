@@ -1,0 +1,45 @@
+# usr_input.yaml
+
+datasets:
+  number_of_datasets: 2
+
+  data_to_use:
+    - "sdss"
+    - "cosmos_web"
+
+  N_z_bins:
+    - 3
+    - 4
+
+  N_host_halos:
+    - 1000
+    - 1000
+
+  N_mag_bins:
+    - 10
+    - 10
+
+  N_color_bins:
+    - 10
+    - 10
+
+
+optimization:
+  num_steps_per_loop: 3
+
+  num_loops: 3
+  
+  learning_rate: 0.1
+  
+  modes:
+    - "fix_diffstarpop_merging"
+    - "fix_diffstarpop"
+    - "fit_all"
+  
+  loss_type: "log_mse_loss"
+
+  initial_guess: "cosmos_260316_mrg"
+
+  output_params: "discowebs1"
+
+

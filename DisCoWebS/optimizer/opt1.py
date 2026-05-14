@@ -10,6 +10,7 @@ from ..likelihood.likelihood_4d import (
     m_i_c1_c2_loss,
     bin_cosmos_data_m_i_c1_c2,
     bin_sdss_data_m_i_c1_c2,
+    bin_cosmos_web_data_m_i_c1_c2,
     m_i_c1_c2_loss_multi_data,
 )
 
@@ -270,6 +271,7 @@ def one_loop_optimization_multi_data(
     mode="fit_all",
     loss_type="log_mse_loss",
     norm=1.0,
+    data_to_use=("cosmos", "sdss"),
 ):
     """
     Perform one loop of optimization
@@ -515,8 +517,13 @@ def multi_loop_optimization_multi_data(
             elif data_to_use[di] == "sdss":
                 bin_data_m_i_c1_c2 = bin_sdss_data_m_i_c1_c2
                 i_i = data_mag_colnames[di].index("modelMag_r")
+            elif data_to_use[di] == "cosmos_web":
+                bin_data_m_i_c1_c2 = bin_cosmos_web_data_m_i_c1_c2
+                i_i = data_mag_colnames[di].index("mag_model_f444w")
             else:
-                raise ValueError("data_to_use: Choose 'cosmos' or 'sdss'.")
+                raise ValueError(
+                    "data_to_use: Choose 'cosmos', 'sdss', or 'cosmos_web'."
+                )
 
             (
                 ran_key,
@@ -608,6 +615,7 @@ def multi_loop_optimization_multi_data(
             mode=mode,
             loss_type=loss_type,
             norm=norm,
+            data_to_use=data_to_use,
         )
 
         if loss_value < best_loss:
@@ -645,6 +653,7 @@ def run_optimization_1data(
     modes=["fix_diffstarpop_merging", "fix_diffstarpop", "fit_all"],
     data_to_use="cosmos",
     loss_type="log_mse_loss",
+    init_params_bounded=None,
 ):
     """
     Run the optimization process.
@@ -661,10 +670,18 @@ def run_optimization_1data(
     elif data_to_use == "sdss":
         bin_data_m_i_c1_c2 = bin_sdss_data_m_i_c1_c2
         i_i = data_mag_colnames.index("modelMag_r")
+    elif data_to_use == "cosmos_web":
+        bin_data_m_i_c1_c2 = bin_cosmos_web_data_m_i_c1_c2
+        i_i = data_mag_colnames.index("mag_model_f444w")
     else:
-        raise ValueError("Invalid data_to_use. Choose 'cosmos' or 'sdss'.")
+        raise ValueError(
+            "Invalid data_to_use. Choose 'cosmos', 'sdss', or 'cosmos_web'."
+        )
 
-    params_bf_bounded = dpwm.DEFAULT_PARAM_COLLECTION
+    if init_params_bounded is not None:
+        params_bf_bounded = init_params_bounded
+    else:
+        params_bf_bounded = dpwm.DEFAULT_PARAM_COLLECTION
 
     (
         ran_key,
@@ -780,6 +797,7 @@ def run_optimization_multi_data(
     modes=("fix_diffstarpop_merging", "fix_diffstarpop", "fit_all"),
     data_to_use=("cosmos", "sdss"),
     loss_type="log_mse_loss",
+    init_params_bounded=None,
 ):
     """
     Run the optimization process.
@@ -812,7 +830,10 @@ def run_optimization_multi_data(
         N_color_bins,
     )
 
-    params_bf_bounded = dpwm.DEFAULT_PARAM_COLLECTION
+    if init_params_bounded is not None:
+        params_bf_bounded = init_params_bounded
+    else:
+        params_bf_bounded = dpwm.DEFAULT_PARAM_COLLECTION
 
     lc_data_all_combined = []
     M_c_data_all_combined = []
@@ -830,8 +851,13 @@ def run_optimization_multi_data(
         elif data_to_use[di] == "sdss":
             bin_data_m_i_c1_c2 = bin_sdss_data_m_i_c1_c2
             i_i = data_mag_colnames[di].index("modelMag_r")
+        elif data_to_use[di] == "cosmos_web":
+            bin_data_m_i_c1_c2 = bin_cosmos_web_data_m_i_c1_c2
+            i_i = data_mag_colnames[di].index("mag_model_f444w")
         else:
-            raise ValueError("Invalid data_to_use. Choose 'cosmos' or 'sdss'.")
+            raise ValueError(
+                "Invalid data_to_use. Choose 'cosmos', 'sdss', or 'cosmos_web'."
+            )
 
         (
             ran_key,
@@ -894,6 +920,7 @@ def run_optimization_multi_data(
         mode="fit_all",
         loss_type=loss_type,
         norm=1.0,
+        data_to_use=data_to_use,
     )
 
     norm = init_loss * 1.0
