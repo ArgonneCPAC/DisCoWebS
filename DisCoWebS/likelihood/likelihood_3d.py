@@ -16,14 +16,14 @@ from .likelihood_kernel import (
 )
 from ..data_loader.cosmos_web_loader import (
     impose_cosmos_web_mag_cut,
-    assign_dropout_values_CW_data,
-    assign_dropout_values_CW_model,
+    assign_dropout_values_CW_data_3d,
+    assign_dropout_values_CW_model_3d,
 )
 from DisCoWebS.modelling.igm import igm_attenuation
 from ..utils.hist import sparse_histogramdd_large
 
 
-def bin_cosmos_data_m_i_c1_c2(
+def bin_cosmos_data_m_i_c(
     cosmos,
     cosmos_mag_colnames,
     N_z_bins,
@@ -114,18 +114,12 @@ def bin_cosmos_data_m_i_c1_c2(
                 mi2 = mi + 1
             else:
                 mi2 = 0
-            if mi >= 1:
-                mi1 = mi - 1
-            else:
-                mi1 = n_mag - 1
 
             cosmos_data_cut = np.vstack(
                 (
                     cosmos_subset_cut[cosmos_mag_colnames[mi]],
                     cosmos_subset_cut["HSC_i_MAG"],
                     cosmos_subset_cut[cosmos_mag_colnames[mi2]]
-                    - cosmos_subset_cut[cosmos_mag_colnames[mi]],
-                    cosmos_subset_cut[cosmos_mag_colnames[mi1]]
                     - cosmos_subset_cut[cosmos_mag_colnames[mi]],
                 )
             ).T
@@ -136,8 +130,6 @@ def bin_cosmos_data_m_i_c1_c2(
                 (cosmos_data_cut[:, 1].max() - cosmos_data_cut[:, 1].min())
                 / N_mag_bins,
                 (cosmos_data_cut[:, 2].max() - cosmos_data_cut[:, 2].min())
-                / N_color_bins,
-                (cosmos_data_cut[:, 3].max() - cosmos_data_cut[:, 3].min())
                 / N_color_bins,
             ]
 
@@ -152,8 +144,6 @@ def bin_cosmos_data_m_i_c1_c2(
                     phot_info["obs_mags_weighted"][:, mi],
                     phot_info["obs_mags_weighted"][:, i_i],
                     phot_info["obs_mags_weighted"][:, mi2]
-                    - phot_info["obs_mags_weighted"][:, mi],
-                    phot_info["obs_mags_weighted"][:, mi1]
                     - phot_info["obs_mags_weighted"][:, mi],
                 )
             ).T
@@ -174,20 +164,12 @@ def bin_cosmos_data_m_i_c1_c2(
             switch = 1
             for i in range(len(non_zero_indices[0])):
                 if switch == 1:
-                    _min_0 = np.array(
-                        [bins[i][0][0], bins[i][1][0], bins[i][2][0], bins[i][3][0]]
-                    )
-                    _max_0 = np.array(
-                        [bins[i][0][1], bins[i][1][1], bins[i][2][1], bins[i][3][1]]
-                    )
+                    _min_0 = np.array([bins[i][0][0], bins[i][1][0], bins[i][2][0]])
+                    _max_0 = np.array([bins[i][0][1], bins[i][1][1], bins[i][2][1]])
                     switch = 0
                 else:
-                    _min_j = np.array(
-                        [bins[i][0][0], bins[i][1][0], bins[i][2][0], bins[i][3][0]]
-                    )
-                    _max_j = np.array(
-                        [bins[i][0][1], bins[i][1][1], bins[i][2][1], bins[i][3][1]]
-                    )
+                    _min_j = np.array([bins[i][0][0], bins[i][1][0], bins[i][2][0]])
+                    _max_j = np.array([bins[i][0][1], bins[i][1][1], bins[i][2][1]])
                     _min_0 = np.vstack([_min_0, _min_j])
                     _max_0 = np.vstack([_max_0, _max_j])
 
@@ -204,8 +186,6 @@ def bin_cosmos_data_m_i_c1_c2(
                         cosmos_subset[cosmos_mag_colnames[mi]],
                         cosmos_subset["HSC_i_MAG"],
                         cosmos_subset[cosmos_mag_colnames[mi2]]
-                        - cosmos_subset[cosmos_mag_colnames[mi]],
-                        cosmos_subset[cosmos_mag_colnames[mi1]]
                         - cosmos_subset[cosmos_mag_colnames[mi]],
                     )
                 ).T,
@@ -231,7 +211,7 @@ def bin_cosmos_data_m_i_c1_c2(
     )
 
 
-def bin_sdss_data_m_i_c1_c2(
+def bin_sdss_data_m_i_c(
     sdss,
     sdss_mag_colnames,
     N_z_bins,
@@ -318,18 +298,12 @@ def bin_sdss_data_m_i_c1_c2(
                 mi2 = mi + 1
             else:
                 mi2 = 0
-            if mi >= 1:
-                mi1 = mi - 1
-            else:
-                mi1 = n_mag - 1
 
             sdss_data_cut = np.vstack(
                 (
                     sdss_subset_cut[sdss_mag_colnames[mi]],
                     sdss_subset_cut["modelMag_r"],
                     sdss_subset_cut[sdss_mag_colnames[mi2]]
-                    - sdss_subset_cut[sdss_mag_colnames[mi]],
-                    sdss_subset_cut[sdss_mag_colnames[mi1]]
                     - sdss_subset_cut[sdss_mag_colnames[mi]],
                 )
             ).T
@@ -338,7 +312,6 @@ def bin_sdss_data_m_i_c1_c2(
                 (sdss_data_cut[:, 0].max() - sdss_data_cut[:, 0].min()) / N_mag_bins,
                 (sdss_data_cut[:, 1].max() - sdss_data_cut[:, 1].min()) / N_mag_bins,
                 (sdss_data_cut[:, 2].max() - sdss_data_cut[:, 2].min()) / N_color_bins,
-                (sdss_data_cut[:, 3].max() - sdss_data_cut[:, 3].min()) / N_color_bins,
             ]
 
             Hist_nD1, edges, occupied_bins = sparse_histogramdd_large(
@@ -352,8 +325,6 @@ def bin_sdss_data_m_i_c1_c2(
                     phot_info["obs_mags_weighted"][:, mi],
                     phot_info["obs_mags_weighted"][:, i_i],
                     phot_info["obs_mags_weighted"][:, mi2]
-                    - phot_info["obs_mags_weighted"][:, mi],
-                    phot_info["obs_mags_weighted"][:, mi1]
                     - phot_info["obs_mags_weighted"][:, mi],
                 )
             ).T
@@ -374,20 +345,12 @@ def bin_sdss_data_m_i_c1_c2(
             switch = 1
             for i in range(len(non_zero_indices[0])):
                 if switch == 1:
-                    _min_0 = np.array(
-                        [bins[i][0][0], bins[i][1][0], bins[i][2][0], bins[i][3][0]]
-                    )
-                    _max_0 = np.array(
-                        [bins[i][0][1], bins[i][1][1], bins[i][2][1], bins[i][3][1]]
-                    )
+                    _min_0 = np.array([bins[i][0][0], bins[i][1][0], bins[i][2][0]])
+                    _max_0 = np.array([bins[i][0][1], bins[i][1][1], bins[i][2][1]])
                     switch = 0
                 else:
-                    _min_j = np.array(
-                        [bins[i][0][0], bins[i][1][0], bins[i][2][0], bins[i][3][0]]
-                    )
-                    _max_j = np.array(
-                        [bins[i][0][1], bins[i][1][1], bins[i][2][1], bins[i][3][1]]
-                    )
+                    _min_j = np.array([bins[i][0][0], bins[i][1][0], bins[i][2][0]])
+                    _max_j = np.array([bins[i][0][1], bins[i][1][1], bins[i][2][1]])
                     _min_0 = np.vstack([_min_0, _min_j])
                     _max_0 = np.vstack([_max_0, _max_j])
 
@@ -404,8 +367,6 @@ def bin_sdss_data_m_i_c1_c2(
                         sdss_subset[sdss_mag_colnames[mi]],
                         sdss_subset["modelMag_r"],
                         sdss_subset[sdss_mag_colnames[mi2]]
-                        - sdss_subset[sdss_mag_colnames[mi]],
-                        sdss_subset[sdss_mag_colnames[mi1]]
                         - sdss_subset[sdss_mag_colnames[mi]],
                     )
                 ).T,
@@ -431,7 +392,7 @@ def bin_sdss_data_m_i_c1_c2(
     )
 
 
-def bin_cosmos_web_data_m_i_c1_c2(
+def bin_cosmos_web_data_m_i_c(
     cosmos_web,
     cosmos_web_mag_colnames,
     N_z_bins,
@@ -529,62 +490,52 @@ def bin_cosmos_web_data_m_i_c1_c2(
             else:
                 mi1 = n_mag - 1
 
-            cosmos_web_4d_data = np.vstack(
+            cosmos_web_3d_data = np.vstack(
                 (
                     cosmos_web_subset[cosmos_web_mag_colnames[mi]],
                     cosmos_web_subset[cosmos_web_mag_colnames[i_i]],
                     cosmos_web_subset[cosmos_web_mag_colnames[mi2]]
                     - cosmos_web_subset[cosmos_web_mag_colnames[mi]],
-                    cosmos_web_subset[cosmos_web_mag_colnames[mi1]]
-                    - cosmos_web_subset[cosmos_web_mag_colnames[mi]],
                 )
             ).T
 
-            cosmos_web_4d_data_dropout = assign_dropout_values_CW_data(
-                cosmos_web_4d_data,
+            cosmos_web_3d_data_dropout = assign_dropout_values_CW_data_3d(
+                cosmos_web_3d_data,
                 cosmos_web_mag_colnames,
                 mi,
                 mi2,
-                mi1,
                 cosmos_web_subset,
             )
 
-            cosmos_web_4d_data_cut = np.vstack(
+            cosmos_web_3d_data_cut = np.vstack(
                 (
                     cosmos_web_subset_cut[cosmos_web_mag_colnames[mi]],
                     cosmos_web_subset_cut[cosmos_web_mag_colnames[i_i]],
                     cosmos_web_subset_cut[cosmos_web_mag_colnames[mi2]]
-                    - cosmos_web_subset_cut[cosmos_web_mag_colnames[mi]],
-                    cosmos_web_subset_cut[cosmos_web_mag_colnames[mi1]]
                     - cosmos_web_subset_cut[cosmos_web_mag_colnames[mi]],
                 )
             ).T
 
             bin_widths = [
                 (
-                    cosmos_web_4d_data_cut[:, 0].max()
-                    - cosmos_web_4d_data_cut[:, 0].min()
+                    cosmos_web_3d_data_cut[:, 0].max()
+                    - cosmos_web_3d_data_cut[:, 0].min()
                 )
                 / N_mag_bins,
                 (
-                    cosmos_web_4d_data_cut[:, 1].max()
-                    - cosmos_web_4d_data_cut[:, 1].min()
+                    cosmos_web_3d_data_cut[:, 1].max()
+                    - cosmos_web_3d_data_cut[:, 1].min()
                 )
                 / N_mag_bins,
                 (
-                    cosmos_web_4d_data_cut[:, 2].max()
-                    - cosmos_web_4d_data_cut[:, 2].min()
-                )
-                / N_color_bins,
-                (
-                    cosmos_web_4d_data_cut[:, 3].max()
-                    - cosmos_web_4d_data_cut[:, 3].min()
+                    cosmos_web_3d_data_cut[:, 2].max()
+                    - cosmos_web_3d_data_cut[:, 2].min()
                 )
                 / N_color_bins,
             ]
 
             Hist_nD1, edges, occupied_bins = sparse_histogramdd_large(
-                cosmos_web_4d_data_dropout,
+                cosmos_web_3d_data_dropout,
                 bin_widths=bin_widths,
                 chunk_size=500_000,
             )
@@ -599,15 +550,13 @@ def bin_cosmos_web_data_m_i_c1_c2(
                     phot_info_obs_mags_wIGM[:, mi],
                     phot_info_obs_mags_wIGM[:, i_i],
                     phot_info_obs_mags_wIGM[:, mi2] - phot_info_obs_mags_wIGM[:, mi],
-                    phot_info_obs_mags_wIGM[:, mi1] - phot_info_obs_mags_wIGM[:, mi],
                 )
             ).T
 
-            phot_info_data_dropout = assign_dropout_values_CW_model(
+            phot_info_data_dropout = assign_dropout_values_CW_model_3d(
                 phot_info_data,
                 mi,
                 mi2,
-                mi1,
                 phot_info,
             )
 
@@ -630,20 +579,12 @@ def bin_cosmos_web_data_m_i_c1_c2(
             switch = 1
             for i in range(len(non_zero_indices[0])):
                 if switch == 1:
-                    _min_0 = np.array(
-                        [bins[i][0][0], bins[i][1][0], bins[i][2][0], bins[i][3][0]]
-                    )
-                    _max_0 = np.array(
-                        [bins[i][0][1], bins[i][1][1], bins[i][2][1], bins[i][3][1]]
-                    )
+                    _min_0 = np.array([bins[i][0][0], bins[i][1][0], bins[i][2][0]])
+                    _max_0 = np.array([bins[i][0][1], bins[i][1][1], bins[i][2][1]])
                     switch = 0
                 else:
-                    _min_j = np.array(
-                        [bins[i][0][0], bins[i][1][0], bins[i][2][0], bins[i][3][0]]
-                    )
-                    _max_j = np.array(
-                        [bins[i][0][1], bins[i][1][1], bins[i][2][1], bins[i][3][1]]
-                    )
+                    _min_j = np.array([bins[i][0][0], bins[i][1][0], bins[i][2][0]])
+                    _max_j = np.array([bins[i][0][1], bins[i][1][1], bins[i][2][1]])
                     _min_0 = np.vstack([_min_0, _min_j])
                     _max_0 = np.vstack([_max_0, _max_j])
 
@@ -655,7 +596,7 @@ def bin_cosmos_web_data_m_i_c1_c2(
             ndsig_M_c_pred_ = (M_c_max_ - M_c_min_) * ndsig_by_dbin
 
             M_c_data_ = signdhist_lomem.nnsig_ndhist(
-                cosmos_web_4d_data_dropout,
+                cosmos_web_3d_data_dropout,
                 ndsig_M_c_data_,
                 M_c_min_,
                 M_c_max_,
@@ -681,7 +622,7 @@ def bin_cosmos_web_data_m_i_c1_c2(
 @partial(
     jjit, static_argnames=["N_z_bins", "i_i", "n_mag", "mode", "loss_type", "norm"]
 )
-def m_i_c1_c2_loss(
+def m_i_c_loss(
     params_u,
     sed_key,
     n_gal_all,
@@ -815,10 +756,6 @@ def m_i_c1_c2_loss(
                 mi2 = mi + 1
             else:
                 mi2 = 0
-            if mi >= 1:
-                mi1 = mi - 1
-            else:
-                mi1 = n_mag - 1
 
             M_c_min_ = M_c_min_all[kk]
             M_c_max_ = M_c_max_all[kk]
@@ -833,8 +770,6 @@ def m_i_c1_c2_loss(
                         phot_info["obs_mags_weighted"][:, mi],
                         phot_info["obs_mags_weighted"][:, i_i],
                         phot_info["obs_mags_weighted"][:, mi2]
-                        - phot_info["obs_mags_weighted"][:, mi],
-                        phot_info["obs_mags_weighted"][:, mi1]
                         - phot_info["obs_mags_weighted"][:, mi],
                     )
                 ).T,
@@ -880,7 +815,7 @@ def m_i_c1_c2_loss(
         "data_to_use",
     ],
 )
-def m_i_c1_c2_loss_multi_data(
+def m_i_c_loss_multi_data(
     params_u,
     sed_key,
     n_gal_all_combined,
@@ -914,7 +849,7 @@ def m_i_c1_c2_loss_multi_data(
         n_mag = int(n_mag_combined[di])
 
         if data_to_use[di] in ["cosmos_web"]:
-            loss_di = m_i_c1_c2_loss_cosmos_web(
+            loss_di = m_i_c_loss_cosmos_web(
                 params_u,
                 sed_key,
                 n_gal_all,
@@ -933,7 +868,7 @@ def m_i_c1_c2_loss_multi_data(
             )
             total_loss = total_loss + loss_di
         else:
-            loss_di = m_i_c1_c2_loss(
+            loss_di = m_i_c_loss(
                 params_u,
                 sed_key,
                 n_gal_all,
@@ -958,7 +893,7 @@ def m_i_c1_c2_loss_multi_data(
 @partial(
     jjit, static_argnames=["N_z_bins", "i_i", "n_mag", "mode", "loss_type", "norm"]
 )
-def m_i_c1_c2_loss_cosmos_web(
+def m_i_c_loss_cosmos_web(
     params_u,
     sed_key,
     n_gal_all,
@@ -1092,10 +1027,6 @@ def m_i_c1_c2_loss_cosmos_web(
                 mi2 = mi + 1
             else:
                 mi2 = 0
-            if mi >= 1:
-                mi1 = mi - 1
-            else:
-                mi1 = n_mag - 1
 
             M_c_min_ = M_c_min_all[kk]
             M_c_max_ = M_c_max_all[kk]
@@ -1114,15 +1045,13 @@ def m_i_c1_c2_loss_cosmos_web(
                     phot_info_obs_mags_wIGM[:, mi],
                     phot_info_obs_mags_wIGM[:, i_i],
                     phot_info_obs_mags_wIGM[:, mi2] - phot_info_obs_mags_wIGM[:, mi],
-                    phot_info_obs_mags_wIGM[:, mi1] - phot_info_obs_mags_wIGM[:, mi],
                 )
             ).T
 
-            phot_info_data_dropout = assign_dropout_values_CW_model(
+            phot_info_data_dropout = assign_dropout_values_CW_model_3d(
                 phot_info_data,
                 mi,
                 mi2,
-                mi1,
                 phot_info,
             )
 

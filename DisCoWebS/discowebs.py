@@ -4,14 +4,13 @@ from DisCoWebS.data_loader import cosmos_web_loader as cwl
 from DisCoWebS.data_loader import load_ssp_templates
 from DisCoWebS.data_loader import sdss_filter_select
 from DisCoWebS.data_loader import cosmos_web_filter_select
-from DisCoWebS.optimizer import opt1
+from DisCoWebS.optimizer import opt1_4d
 from DisCoWebS.data_loader.param_collection import (
     load_param_collection,
     write_param_collection,
 )
 from DisCoWebS import config
 from DisCoWebS.modelling.igm import load_igm_attenuation_table
-
 
 if __name__ == "__main__":
     # Load data:
@@ -49,11 +48,11 @@ if __name__ == "__main__":
 
     # Choose a set of initial parameters:
     init_params_bounded = load_param_collection(
-        drn_mock="~/calibrated_params/", mock_version_name="cosmos_260316_mrg"
+        drn_mock="~/calibrated_params/", mock_version_name="discowebs1"
     )
 
     # Run optimization:
-    params_bf_bounded, best_loss = opt1.run_optimization_multi_data(
+    params_bf_bounded, best_loss = opt1_4d.run_optimization_multi_data(
         data=(sdss, cosmos_web),
         data_mag_colnames=(sdss_mag_colnames, cosmos_web_mag_colnames),
         N_z_bins=(2, 4),
@@ -65,8 +64,8 @@ if __name__ == "__main__":
         N_mag_bins=(8, 10),
         N_color_bins=(10, 10),
         ndsig_by_dbin=0.5,
-        num_loops=2,
-        num_steps_per_loop=2,
+        num_loops=4,
+        num_steps_per_loop=4,
         modes=("fix_diffstarpop_merging", "fix_diffstarpop", "fit_all"),
         data_to_use=("sdss", "cosmos_web"),
         loss_type="log_mse_loss",
@@ -79,4 +78,3 @@ if __name__ == "__main__":
         mock_version_name="discowebs1",
         param_collection=params_bf_bounded,
     )
-

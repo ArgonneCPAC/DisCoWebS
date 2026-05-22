@@ -277,6 +277,59 @@ def assign_dropout_values_CW_data(
     return cosmos_web_4d_data
 
 
+def assign_dropout_values_CW_data_3d(
+    cosmos_web_3d_data,
+    cosmos_web_mag_colnames,
+    mi,
+    mi2,
+    cosmos_web_subset,
+):
+
+    filter_thresholds = {
+        "mag_model_cfht-u": 27.0,
+        "mag_model_hsc-g": 27.0,
+        "mag_model_hsc-r": 27.0,
+        "mag_model_hsc-i": 27.0,
+        "mag_model_hsc-z": 26.5,
+        "mag_model_hsc-y": 26.0,
+        "mag_model_hst-f814w": 27.0,
+        "mag_model_f115w": 27.0,
+        "mag_model_f150w": 27.0,
+        "mag_model_f277w": 27.0,
+        "mag_model_f444w": 27.0,
+        "mag_model_f770w": 27.0,
+    }
+
+    filter_max = [0] * len(cosmos_web_mag_colnames)
+
+    for filter_name, mmax in filter_thresholds.items():
+        if filter_name in cosmos_web_mag_colnames:
+            i = cosmos_web_mag_colnames.index(filter_name)
+            filter_max[i] = mmax
+
+    mask_mi_drop = (cosmos_web_subset[cosmos_web_mag_colnames[mi]] > filter_max[mi]) & (
+        cosmos_web_subset[cosmos_web_mag_colnames[mi2]] < filter_max[mi2]
+    )
+
+    mask_m2_drop = (cosmos_web_subset[cosmos_web_mag_colnames[mi]] < filter_max[mi]) & (
+        cosmos_web_subset[cosmos_web_mag_colnames[mi2]] > filter_max[mi2]
+    )
+
+    mask_mi_m2_drop = (
+        cosmos_web_subset[cosmos_web_mag_colnames[mi]] > filter_max[mi]
+    ) & (cosmos_web_subset[cosmos_web_mag_colnames[mi2]] > filter_max[mi2])
+
+    cosmos_web_3d_data[mask_mi_drop, 0] = 35.0
+    cosmos_web_3d_data[mask_mi_drop, 2] = -10.0
+
+    cosmos_web_3d_data[mask_m2_drop, 2] = 10.0
+
+    cosmos_web_3d_data[mask_mi_m2_drop, 0] = 55.0
+    cosmos_web_3d_data[mask_mi_m2_drop, 2] = 20.0
+
+    return cosmos_web_3d_data
+
+
 @partial(jax.jit, static_argnames=("mi", "mi2", "mi1"))
 def assign_dropout_values_CW_model(
     phot_info_data,
@@ -404,6 +457,71 @@ def assign_dropout_values_CW_model(
     return phot_info_data
 
 
+@partial(jax.jit, static_argnames=("mi", "mi2"))
+def assign_dropout_values_CW_model_3d(
+    phot_info_data,
+    mi,
+    mi2,
+    phot_info,
+):
+
+    filter_thresholds = {
+        "chft_u": 27.0,
+        "hsc_g": 27.0,
+        "hsc_r": 27.0,
+        "hsc_i": 27.0,
+        "hsc_z": 26.5,
+        "hsc_y": 26.0,
+        "hst_f814w": 27.0,
+        "nircam_f115w": 27.0,
+        "nircam_f150w": 27.0,
+        "nircam_f277w": 27.0,
+        "nircam_f444w": 27.0,
+        "miri_f770w": 27.0,
+    }
+
+    filter_max = [0] * len(config.cosmos_web_filters_to_use)
+
+    for filter_name, mmax in filter_thresholds.items():
+        if filter_name in config.cosmos_web_filters_to_use:
+            i = config.cosmos_web_filters_to_use.index(filter_name)
+            filter_max[i] = mmax
+
+    obs_mags = jnp.stack(phot_info["obs_mags"], axis=0)
+
+    mask_mi_drop = (obs_mags[:, mi] > filter_max[mi]) & (
+        obs_mags[:, mi2] < filter_max[mi2]
+    )
+
+    mask_m2_drop = (obs_mags[:, mi] < filter_max[mi]) & (
+        obs_mags[:, mi2] > filter_max[mi2]
+    )
+
+    mask_mi_m2_drop = (obs_mags[:, mi] > filter_max[mi]) & (
+        obs_mags[:, mi2] > filter_max[mi2]
+    )
+
+    phot_info_data = phot_info_data.at[:, 0].set(
+        jnp.where(mask_mi_drop, 35.0, phot_info_data[:, 0])
+    )
+    phot_info_data = phot_info_data.at[:, 2].set(
+        jnp.where(mask_mi_drop, -10.0, phot_info_data[:, 2])
+    )
+
+    phot_info_data = phot_info_data.at[:, 2].set(
+        jnp.where(mask_m2_drop, 10.0, phot_info_data[:, 2])
+    )
+
+    phot_info_data = phot_info_data.at[:, 0].set(
+        jnp.where(mask_mi_m2_drop, 55.0, phot_info_data[:, 0])
+    )
+    phot_info_data = phot_info_data.at[:, 2].set(
+        jnp.where(mask_mi_m2_drop, 20.0, phot_info_data[:, 2])
+    )
+
+    return phot_info_data
+
+
 def bin_cosmos_web_4d_data(c4d_data_cut, c4d_data_dropout, N_mag_bins, N_color_bins):
 
     width_0 = (c4d_data_cut[:, 0].max() - c4d_data_cut[:, 0].min()) / N_mag_bins
@@ -432,4 +550,29 @@ def bin_cosmos_web_4d_data(c4d_data_cut, c4d_data_dropout, N_mag_bins, N_color_b
         width_3,
     )
     bins = (edges0, edges1, edges2, edges3)
+    return bins
+
+
+def bin_cosmos_web_3d_data(c4d_data_cut, c4d_data_dropout, N_mag_bins, N_color_bins):
+
+    width_0 = (c4d_data_cut[:, 0].max() - c4d_data_cut[:, 0].min()) / N_mag_bins
+    width_1 = (c4d_data_cut[:, 1].max() - c4d_data_cut[:, 1].min()) / N_mag_bins
+    width_2 = (c4d_data_cut[:, 2].max() - c4d_data_cut[:, 2].min()) / N_color_bins
+
+    edges0 = np.arange(
+        c4d_data_dropout[:, 0].min(),
+        c4d_data_dropout[:, 0].max() + width_0,
+        width_0,
+    )
+    edges1 = np.arange(
+        c4d_data_dropout[:, 1].min(),
+        c4d_data_dropout[:, 1].max() + width_1,
+        width_1,
+    )
+    edges2 = np.arange(
+        c4d_data_dropout[:, 2].min(),
+        c4d_data_dropout[:, 2].max() + width_2,
+        width_2,
+    )
+    bins = (edges0, edges1, edges2)
     return bins
