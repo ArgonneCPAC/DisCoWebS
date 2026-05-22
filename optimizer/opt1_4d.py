@@ -4,7 +4,6 @@ from jax import jit as jjit
 import optax
 from jax import value_and_grad
 from functools import partial
-import numpy as np
 
 from ..likelihood.likelihood_4d import (
     m_i_c1_c2_loss,
@@ -119,12 +118,6 @@ def train_step(
         "mode",
         "loss_type",
         "norm",
-        # "n_gal_all_combined",
-        # "lc_data_all_combined",
-        # "M_c_data_all_combined",
-        # "ndsig_M_c_pred_all_combined",
-        # "M_c_min_all_combined",
-        # "M_c_max_all_combined",
         "N_z_bins",
         "i_i_combined",
         "n_mag_combined",

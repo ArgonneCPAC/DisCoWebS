@@ -1,4 +1,1 @@
 DisCoWebS
-build
-tests
-utils

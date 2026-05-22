@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: DisCoWebS
-Version: 0.1.dev10+g5ee476d62.d20260514
+Version: 1.0.0
 Summary: Diffsky joint modelling of Cosmos-Web and SDSS data
 Author-email: Kaustav Mitra <kmitra@anl.gov>, Natália Villa Nova Rodrigues <nvillanovarodrigues@anl.gov>, Andrew Hearin <ahearin@anl.gov>, Kumail Zaidi <kzaidi@anl.gov>
 License: BSD 3-Clause License

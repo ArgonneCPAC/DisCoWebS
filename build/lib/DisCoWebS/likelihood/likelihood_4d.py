@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 from jax import random as jran
 from diffsky.experimental import lightcone_generators as lcg
-from diffsky.experimental.mc_phot import mc_lc_phot_merging
+from diffsky.experimental.kernels import gd_phot_kernels_merging as gpkm
 from dsps.cosmology import DEFAULT_COSMOLOGY
 from diffstar.defaults import FB
 from diffsky import signdhist_lomem
@@ -15,7 +15,6 @@ from .likelihood_kernel import (
     ln_poisson_loss,
 )
 from ..data_loader.cosmos_web_loader import (
-    bin_cosmos_web_4d_data,
     impose_cosmos_web_mag_cut,
     assign_dropout_values_CW_data,
     assign_dropout_values_CW_model,
@@ -73,18 +72,30 @@ def bin_cosmos_data_m_i_c1_c2(
 
         ran_key, sed_key = jran.split(ran_key, 2)
 
-        phot_info = mc_lc_phot_merging(
+        phot_info = gpkm._mc_phot_kern_merging(
             sed_key,
-            lc_data,
-            diffstarpop_params=params_b.diffstarpop_params,
-            mzr_params=params_b.mzr_params,
-            spspop_params=params_b.spspop_params,
-            scatter_params=params_b.scatter_params,
-            ssperr_params=params_b.ssperr_params,
-            merging_params=params_b.merging_params,
-            cosmo_params=DEFAULT_COSMOLOGY,
-            fb=FB,
-            skip_param_check=True,
+            lc_data.z_obs,
+            lc_data.t_obs,
+            lc_data.mah_params,
+            lc_data.ssp_data,
+            lc_data.precomputed_ssp_mag_table,
+            lc_data.z_phot_table,
+            lc_data.wave_eff_table,
+            params_b.diffstarpop_params,
+            params_b.mzr_params,
+            params_b.spspop_params,
+            params_b.scatter_params,
+            params_b.ssperr_params,
+            params_b.merging_params,
+            DEFAULT_COSMOLOGY,
+            FB,
+            lc_data.logmp_infall,
+            lc_data.logmhost_infall,
+            lc_data.t_infall,
+            lc_data.is_central,
+            lc_data.sat_weight,
+            lc_data.halo_indx,
+            lc_data.mc_merge,
         )
 
         cosmos_subset = cosmos[(cosmos["photoz"] >= z_min) & (cosmos["photoz"] < z_max)]
@@ -138,10 +149,12 @@ def bin_cosmos_data_m_i_c1_c2(
 
             phot_info_data = np.vstack(
                 (
-                    phot_info["obs_mags"][:, mi],
-                    phot_info["obs_mags"][:, i_i],
-                    phot_info["obs_mags"][:, mi2] - phot_info["obs_mags"][:, mi],
-                    phot_info["obs_mags"][:, mi1] - phot_info["obs_mags"][:, mi],
+                    phot_info["obs_mags_weighted"][:, mi],
+                    phot_info["obs_mags_weighted"][:, i_i],
+                    phot_info["obs_mags_weighted"][:, mi2]
+                    - phot_info["obs_mags_weighted"][:, mi],
+                    phot_info["obs_mags_weighted"][:, mi1]
+                    - phot_info["obs_mags_weighted"][:, mi],
                 )
             ).T
 
@@ -265,18 +278,30 @@ def bin_sdss_data_m_i_c1_c2(
 
         ran_key, sed_key = jran.split(ran_key, 2)
 
-        phot_info = mc_lc_phot_merging(
+        phot_info = gpkm._mc_phot_kern_merging(
             sed_key,
-            lc_data,
-            diffstarpop_params=params_b.diffstarpop_params,
-            mzr_params=params_b.mzr_params,
-            spspop_params=params_b.spspop_params,
-            scatter_params=params_b.scatter_params,
-            ssperr_params=params_b.ssperr_params,
-            merging_params=params_b.merging_params,
-            cosmo_params=DEFAULT_COSMOLOGY,
-            fb=FB,
-            skip_param_check=True,
+            lc_data.z_obs,
+            lc_data.t_obs,
+            lc_data.mah_params,
+            lc_data.ssp_data,
+            lc_data.precomputed_ssp_mag_table,
+            lc_data.z_phot_table,
+            lc_data.wave_eff_table,
+            params_b.diffstarpop_params,
+            params_b.mzr_params,
+            params_b.spspop_params,
+            params_b.scatter_params,
+            params_b.ssperr_params,
+            params_b.merging_params,
+            DEFAULT_COSMOLOGY,
+            FB,
+            lc_data.logmp_infall,
+            lc_data.logmhost_infall,
+            lc_data.t_infall,
+            lc_data.is_central,
+            lc_data.sat_weight,
+            lc_data.halo_indx,
+            lc_data.mc_merge,
         )
 
         sdss_subset = sdss[(sdss["z"] >= z_min) & (sdss["z"] < z_max)]
@@ -324,10 +349,12 @@ def bin_sdss_data_m_i_c1_c2(
 
             phot_info_data = np.vstack(
                 (
-                    phot_info["obs_mags"][:, mi],
-                    phot_info["obs_mags"][:, i_i],
-                    phot_info["obs_mags"][:, mi2] - phot_info["obs_mags"][:, mi],
-                    phot_info["obs_mags"][:, mi1] - phot_info["obs_mags"][:, mi],
+                    phot_info["obs_mags_weighted"][:, mi],
+                    phot_info["obs_mags_weighted"][:, i_i],
+                    phot_info["obs_mags_weighted"][:, mi2]
+                    - phot_info["obs_mags_weighted"][:, mi],
+                    phot_info["obs_mags_weighted"][:, mi1]
+                    - phot_info["obs_mags_weighted"][:, mi],
                 )
             ).T
 
@@ -454,18 +481,30 @@ def bin_cosmos_web_data_m_i_c1_c2(
 
         ran_key, sed_key = jran.split(ran_key, 2)
 
-        phot_info = mc_lc_phot_merging(
+        phot_info = gpkm._mc_phot_kern_merging(
             sed_key,
-            lc_data,
-            diffstarpop_params=params_b.diffstarpop_params,
-            mzr_params=params_b.mzr_params,
-            spspop_params=params_b.spspop_params,
-            scatter_params=params_b.scatter_params,
-            ssperr_params=params_b.ssperr_params,
-            merging_params=params_b.merging_params,
-            cosmo_params=DEFAULT_COSMOLOGY,
-            fb=FB,
-            skip_param_check=True,
+            lc_data.z_obs,
+            lc_data.t_obs,
+            lc_data.mah_params,
+            lc_data.ssp_data,
+            lc_data.precomputed_ssp_mag_table,
+            lc_data.z_phot_table,
+            lc_data.wave_eff_table,
+            params_b.diffstarpop_params,
+            params_b.mzr_params,
+            params_b.spspop_params,
+            params_b.scatter_params,
+            params_b.ssperr_params,
+            params_b.merging_params,
+            DEFAULT_COSMOLOGY,
+            FB,
+            lc_data.logmp_infall,
+            lc_data.logmhost_infall,
+            lc_data.t_infall,
+            lc_data.is_central,
+            lc_data.sat_weight,
+            lc_data.halo_indx,
+            lc_data.mc_merge,
         )
 
         cosmos_web_subset = cosmos_web[
@@ -521,13 +560,6 @@ def bin_cosmos_web_data_m_i_c1_c2(
                 )
             ).T
 
-            bins = bin_cosmos_web_4d_data(
-                cosmos_web_4d_data_cut,
-                cosmos_web_4d_data_dropout,
-                N_mag_bins,
-                N_color_bins,
-            )
-
             bin_widths = [
                 (
                     cosmos_web_4d_data_cut[:, 0].max()
@@ -558,7 +590,7 @@ def bin_cosmos_web_data_m_i_c1_c2(
             )
 
             phot_info_obs_mags_wIGM = igm_attenuation(
-                phot_info["obs_mags"],
+                phot_info["obs_mags_weighted"],
                 lc_data.z_obs,
             )
 
@@ -752,18 +784,30 @@ def m_i_c1_c2_loss(
         lc_data = lc_data_all[zi]
         n_gal = n_gal_all[zi]
 
-        phot_info = mc_lc_phot_merging(
+        phot_info = gpkm._mc_phot_kern_merging(
             sed_key,
-            lc_data,
-            diffstarpop_params=params_bounded.diffstarpop_params,
-            mzr_params=params_bounded.mzr_params,
-            spspop_params=params_bounded.spspop_params,
-            scatter_params=params_bounded.scatter_params,
-            ssperr_params=params_bounded.ssperr_params,
-            merging_params=params_bounded.merging_params,
-            cosmo_params=DEFAULT_COSMOLOGY,
-            fb=FB,
-            skip_param_check=True,
+            lc_data.z_obs,
+            lc_data.t_obs,
+            lc_data.mah_params,
+            lc_data.ssp_data,
+            lc_data.precomputed_ssp_mag_table,
+            lc_data.z_phot_table,
+            lc_data.wave_eff_table,
+            params_bounded.diffstarpop_params,
+            params_bounded.mzr_params,
+            params_bounded.spspop_params,
+            params_bounded.scatter_params,
+            params_bounded.ssperr_params,
+            params_bounded.merging_params,
+            DEFAULT_COSMOLOGY,
+            FB,
+            lc_data.logmp_infall,
+            lc_data.logmhost_infall,
+            lc_data.t_infall,
+            lc_data.is_central,
+            lc_data.sat_weight,
+            lc_data.halo_indx,
+            lc_data.mc_merge,
         )
 
         for mi in range(n_mag):
@@ -786,10 +830,12 @@ def m_i_c1_c2_loss(
             M_c_pred_ = signdhist_lomem.nnsig_ndhist_weighted(
                 jnp.vstack(
                     (
-                        phot_info["obs_mags"][:, mi],
-                        phot_info["obs_mags"][:, i_i],
-                        phot_info["obs_mags"][:, mi2] - phot_info["obs_mags"][:, mi],
-                        phot_info["obs_mags"][:, mi1] - phot_info["obs_mags"][:, mi],
+                        phot_info["obs_mags_weighted"][:, mi],
+                        phot_info["obs_mags_weighted"][:, i_i],
+                        phot_info["obs_mags_weighted"][:, mi2]
+                        - phot_info["obs_mags_weighted"][:, mi],
+                        phot_info["obs_mags_weighted"][:, mi1]
+                        - phot_info["obs_mags_weighted"][:, mi],
                     )
                 ).T,
                 ndsig_M_c_pred_,
@@ -1015,18 +1061,30 @@ def m_i_c1_c2_loss_cosmos_web(
         lc_data = lc_data_all[zi]
         n_gal = n_gal_all[zi]
 
-        phot_info = mc_lc_phot_merging(
+        phot_info = gpkm._mc_phot_kern_merging(
             sed_key,
-            lc_data,
-            diffstarpop_params=params_bounded.diffstarpop_params,
-            mzr_params=params_bounded.mzr_params,
-            spspop_params=params_bounded.spspop_params,
-            scatter_params=params_bounded.scatter_params,
-            ssperr_params=params_bounded.ssperr_params,
-            merging_params=params_bounded.merging_params,
-            cosmo_params=DEFAULT_COSMOLOGY,
-            fb=FB,
-            skip_param_check=True,
+            lc_data.z_obs,
+            lc_data.t_obs,
+            lc_data.mah_params,
+            lc_data.ssp_data,
+            lc_data.precomputed_ssp_mag_table,
+            lc_data.z_phot_table,
+            lc_data.wave_eff_table,
+            params_bounded.diffstarpop_params,
+            params_bounded.mzr_params,
+            params_bounded.spspop_params,
+            params_bounded.scatter_params,
+            params_bounded.ssperr_params,
+            params_bounded.merging_params,
+            DEFAULT_COSMOLOGY,
+            FB,
+            lc_data.logmp_infall,
+            lc_data.logmhost_infall,
+            lc_data.t_infall,
+            lc_data.is_central,
+            lc_data.sat_weight,
+            lc_data.halo_indx,
+            lc_data.mc_merge,
         )
 
         for mi in range(n_mag):
@@ -1047,7 +1105,7 @@ def m_i_c1_c2_loss_cosmos_web(
             M_c_data_ = M_c_data_all[kk]
 
             phot_info_obs_mags_wIGM = igm_attenuation(
-                phot_info["obs_mags"],
+                phot_info["obs_mags_weighted"],
                 lc_data.z_obs,
             )
 

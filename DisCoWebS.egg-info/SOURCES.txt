@@ -13,6 +13,7 @@ discowebs.py
 pyproject.toml
 requirements.txt
 setup.py
+usr_input.yaml
 DisCoWebS/.DS_Store
 DisCoWebS/.coveragerc
 DisCoWebS/.git_archival.txt
@@ -53,6 +54,7 @@ DisCoWebS/data_loader/sdss_filter_select.py
 DisCoWebS/data_loader/sdss_loader.py
 DisCoWebS/likelihood/.DS_Store
 DisCoWebS/likelihood/__init__.py
+DisCoWebS/likelihood/likelihood_3d.py
 DisCoWebS/likelihood/likelihood_4d.py
 DisCoWebS/likelihood/likelihood_kernel.py
 DisCoWebS/modelling/__init__.py
@@ -60,7 +62,8 @@ DisCoWebS/modelling/igm.py
 DisCoWebS/modelling/igm_attenuation.h5
 DisCoWebS/optimizer/.DS_Store
 DisCoWebS/optimizer/__init__.py
-DisCoWebS/optimizer/opt1.py
+DisCoWebS/optimizer/opt1_3d.py
+DisCoWebS/optimizer/opt1_4d.py
 DisCoWebS/tests/.DS_Store
 DisCoWebS/tests/__init__.py
 DisCoWebS/tests/test_readme.py
@@ -106,16 +109,8 @@ likelihood/__pycache__/likelihood_4d.cpython-313.pyc
 likelihood/__pycache__/likelihood_kernel.cpython-313.pyc
 modelling/__init__.py
 modelling/igm.py
+modelling/igm_attenuation.h5
 optimizer/__init__.py
 optimizer/opt1.py
 optimizer/__pycache__/__init__.cpython-313.pyc
 optimizer/__pycache__/opt1.cpython-313.pyc
-tests/.DS_Store
-tests/__init__.py
-tests/test_readme.py
-tests/__pycache__/__init__.cpython-313.pyc
-tests/__pycache__/test_readme.cpython-313.pyc
-tests/testing_data/__init__.py
-tests/testing_data/__pycache__/__init__.cpython-313.pyc
-utils/__init__.py
-utils/hist.py

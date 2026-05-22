@@ -12,7 +12,7 @@ write_to_template = "__version__ = '{version}'\n"
 
 [tool.setuptools]
 include-package-data = true
-packages = {find = {exclude=["data*","optimizer","likelihood","modelling"]}}
+packages = {find = {exclude=["data*","optimizer","likelihood","modelling","build*", "test*", "utils*"]}}
 package-data = {DisCoWebS = ["data/*.txt", "tests/testing_data/*.npy"]}
 package-dir = {DisCoWebS = "DisCoWebS"}
 
