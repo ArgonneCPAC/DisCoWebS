@@ -5,7 +5,7 @@ import optax
 from jax import value_and_grad
 from functools import partial
 
-from ..likelihood.likelihood_4d import (
+from ..likelihood.likelihood_3d import (
     m_i_c_loss,
     bin_cosmos_data_m_i_c,
     bin_sdss_data_m_i_c,

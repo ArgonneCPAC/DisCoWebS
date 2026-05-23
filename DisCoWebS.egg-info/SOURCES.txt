@@ -102,6 +102,7 @@ data_loader/__pycache__/retrieve_fsps_data.cpython-313.pyc
 data_loader/__pycache__/sdss_filter_select.cpython-313.pyc
 data_loader/__pycache__/sdss_loader.cpython-313.pyc
 likelihood/__init__.py
+likelihood/likelihood_3d.py
 likelihood/likelihood_4d.py
 likelihood/likelihood_kernel.py
 likelihood/__pycache__/__init__.cpython-313.pyc
@@ -112,5 +113,16 @@ modelling/igm.py
 modelling/igm_attenuation.h5
 optimizer/__init__.py
 optimizer/opt1.py
+optimizer/opt1_3d.py
+optimizer/opt1_4d.py
 optimizer/__pycache__/__init__.cpython-313.pyc
 optimizer/__pycache__/opt1.cpython-313.pyc
+tests/.DS_Store
+tests/__init__.py
+tests/test_readme.py
+tests/__pycache__/__init__.cpython-313.pyc
+tests/__pycache__/test_readme.cpython-313.pyc
+tests/testing_data/__init__.py
+tests/testing_data/__pycache__/__init__.cpython-313.pyc
+utils/__init__.py
+utils/hist.py
