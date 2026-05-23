@@ -95,7 +95,7 @@ def bin_cosmos_data_m_i_c(
             lc_data.is_central,
             lc_data.sat_weight,
             lc_data.halo_indx,
-            lc_data.mc_merge,
+            mc_merge=0,
         )
 
         cosmos_subset = cosmos[(cosmos["photoz"] >= z_min) & (cosmos["photoz"] < z_max)]
@@ -281,7 +281,7 @@ def bin_sdss_data_m_i_c(
             lc_data.is_central,
             lc_data.sat_weight,
             lc_data.halo_indx,
-            lc_data.mc_merge,
+            mc_merge=0,
         )
 
         sdss_subset = sdss[(sdss["z"] >= z_min) & (sdss["z"] < z_max)]
@@ -465,7 +465,7 @@ def bin_cosmos_web_data_m_i_c(
             lc_data.is_central,
             lc_data.sat_weight,
             lc_data.halo_indx,
-            lc_data.mc_merge,
+            mc_merge=0,
         )
 
         cosmos_web_subset = cosmos_web[
@@ -748,7 +748,7 @@ def m_i_c_loss(
             lc_data.is_central,
             lc_data.sat_weight,
             lc_data.halo_indx,
-            lc_data.mc_merge,
+            mc_merge=0,
         )
 
         for mi in range(n_mag):
@@ -1019,7 +1019,7 @@ def m_i_c_loss_cosmos_web(
             lc_data.is_central,
             lc_data.sat_weight,
             lc_data.halo_indx,
-            lc_data.mc_merge,
+            mc_merge=0,
         )
 
         for mi in range(n_mag):
