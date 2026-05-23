@@ -149,12 +149,12 @@ def bin_cosmos_data_m_i_c1_c2(
 
             phot_info_data = np.vstack(
                 (
-                    phot_info["obs_mags_weighted"][:, mi],
-                    phot_info["obs_mags_weighted"][:, i_i],
-                    phot_info["obs_mags_weighted"][:, mi2]
-                    - phot_info["obs_mags_weighted"][:, mi],
-                    phot_info["obs_mags_weighted"][:, mi1]
-                    - phot_info["obs_mags_weighted"][:, mi],
+                    phot_info.obs_mags_weighted[:, mi],
+                    phot_info.obs_mags_weighted[:, i_i],
+                    phot_info.obs_mags_weighted[:, mi2]
+                    - phot_info.obs_mags_weighted[:, mi],
+                    phot_info.obs_mags_weighted[:, mi1]
+                    - phot_info.obs_mags_weighted[:, mi],
                 )
             ).T
 
@@ -349,12 +349,12 @@ def bin_sdss_data_m_i_c1_c2(
 
             phot_info_data = np.vstack(
                 (
-                    phot_info["obs_mags_weighted"][:, mi],
-                    phot_info["obs_mags_weighted"][:, i_i],
-                    phot_info["obs_mags_weighted"][:, mi2]
-                    - phot_info["obs_mags_weighted"][:, mi],
-                    phot_info["obs_mags_weighted"][:, mi1]
-                    - phot_info["obs_mags_weighted"][:, mi],
+                    phot_info.obs_mags_weighted[:, mi],
+                    phot_info.obs_mags_weighted[:, i_i],
+                    phot_info.obs_mags_weighted[:, mi2]
+                    - phot_info.obs_mags_weighted[:, mi],
+                    phot_info.obs_mags_weighted[:, mi1]
+                    - phot_info.obs_mags_weighted[:, mi],
                 )
             ).T
 
@@ -590,7 +590,7 @@ def bin_cosmos_web_data_m_i_c1_c2(
             )
 
             phot_info_obs_mags_wIGM = igm_attenuation(
-                phot_info["obs_mags_weighted"],
+                phot_info.obs_mags_weighted,
                 lc_data.z_obs,
             )
 
@@ -830,12 +830,12 @@ def m_i_c1_c2_loss(
             M_c_pred_ = signdhist_lomem.nnsig_ndhist_weighted(
                 jnp.vstack(
                     (
-                        phot_info["obs_mags_weighted"][:, mi],
-                        phot_info["obs_mags_weighted"][:, i_i],
-                        phot_info["obs_mags_weighted"][:, mi2]
-                        - phot_info["obs_mags_weighted"][:, mi],
-                        phot_info["obs_mags_weighted"][:, mi1]
-                        - phot_info["obs_mags_weighted"][:, mi],
+                        phot_info.obs_mags_weighted[:, mi],
+                        phot_info.obs_mags_weighted[:, i_i],
+                        phot_info.obs_mags_weighted[:, mi2]
+                        - phot_info.obs_mags_weighted[:, mi],
+                        phot_info.obs_mags_weighted[:, mi1]
+                        - phot_info.obs_mags_weighted[:, mi],
                     )
                 ).T,
                 ndsig_M_c_pred_,
@@ -1105,7 +1105,7 @@ def m_i_c1_c2_loss_cosmos_web(
             M_c_data_ = M_c_data_all[kk]
 
             phot_info_obs_mags_wIGM = igm_attenuation(
-                phot_info["obs_mags_weighted"],
+                phot_info.obs_mags_weighted,
                 lc_data.z_obs,
             )
 

@@ -361,7 +361,7 @@ def assign_dropout_values_CW_model(
             i = config.cosmos_web_filters_to_use.index(filter_name)
             filter_max[i] = mmax
 
-    obs_mags = jnp.stack(phot_info["obs_mags"], axis=0)
+    obs_mags = jnp.stack(phot_info.obs_mags_weighted, axis=0)
 
     mask_mi_drop = (
         (obs_mags[:, mi] > filter_max[mi])
@@ -487,7 +487,7 @@ def assign_dropout_values_CW_model_3d(
             i = config.cosmos_web_filters_to_use.index(filter_name)
             filter_max[i] = mmax
 
-    obs_mags = jnp.stack(phot_info["obs_mags"], axis=0)
+    obs_mags = jnp.stack(phot_info.obs_mags_weighted, axis=0)
 
     mask_mi_drop = (obs_mags[:, mi] > filter_max[mi]) & (
         obs_mags[:, mi2] < filter_max[mi2]
