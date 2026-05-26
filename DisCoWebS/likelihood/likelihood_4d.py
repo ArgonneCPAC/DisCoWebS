@@ -72,7 +72,7 @@ def bin_cosmos_data_m_i_c1_c2(
 
         ran_key, sed_key = jran.split(ran_key, 2)
 
-        phot_info = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
@@ -278,7 +278,7 @@ def bin_sdss_data_m_i_c1_c2(
 
         ran_key, sed_key = jran.split(ran_key, 2)
 
-        phot_info = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
@@ -481,7 +481,7 @@ def bin_cosmos_web_data_m_i_c1_c2(
 
         ran_key, sed_key = jran.split(ran_key, 2)
 
-        phot_info = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
@@ -784,7 +784,7 @@ def m_i_c1_c2_loss(
         lc_data = lc_data_all[zi]
         n_gal = n_gal_all[zi]
 
-        phot_info = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
@@ -1061,7 +1061,7 @@ def m_i_c1_c2_loss_cosmos_web(
         lc_data = lc_data_all[zi]
         n_gal = n_gal_all[zi]
 
-        phot_info = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
