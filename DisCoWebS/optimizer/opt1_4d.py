@@ -1,9 +1,11 @@
+from DisCoWebS import config
 from jax import random as jran
 from diffsky.param_utils import diffsky_param_wrapper_merging as dpwm
 from jax import jit as jjit
 import optax
-from jax import value_and_grad
+from jax import value_and_grad, clear_caches
 from functools import partial
+from ..data_loader.param_collection import write_param_collection
 
 from ..likelihood.likelihood_4d import (
     m_i_c1_c2_loss,
@@ -235,10 +237,10 @@ def one_loop_optimization(
             norm=norm,
         )
         if step == 0:
-            min_loss = loss_value
+            min_loss = float(loss_value)
 
-        if loss_value < min_loss:
-            min_loss = loss_value
+        if float(loss_value) < min_loss:
+            min_loss = float(loss_value)
             params_u_bf = params_u
 
     return params_u_bf, min_loss
@@ -297,10 +299,10 @@ def one_loop_optimization_multi_data(
             norm=norm,
         )
         if step == 0:
-            min_loss = loss_value
+            min_loss = float(loss_value)
 
-        if loss_value < min_loss:
-            min_loss = loss_value
+        if float(loss_value) < min_loss:
+            min_loss = float(loss_value)
             params_u_bf = params_u
 
     return params_u_bf, min_loss
@@ -625,6 +627,8 @@ def multi_loop_optimization_multi_data(
             best_params_u.ssperr_u_params,
             best_params_u.merging_u_params,
         )
+
+        clear_caches()
 
     return params_bf_bounded, best_loss
 
@@ -963,6 +967,15 @@ def run_optimization_multi_data(
             params_bf_bounded.ssperr_params,
             params_bf_bounded.merging_params,
         )
+
+        # Save the best-fit parameters:
+        write_param_collection(
+            drn_mock="~/calibrated_params",
+            mock_version_name=config.mock_version_name + "_" + mode + "_4d",
+            param_collection=params_bf_bounded,
+        )
+
+        clear_caches()
 
     return params_bf_bounded, best_loss
 

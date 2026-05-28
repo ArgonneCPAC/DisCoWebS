@@ -12,6 +12,9 @@ from DisCoWebS.data_loader.param_collection import (
 from DisCoWebS import config
 from DisCoWebS.modelling.igm import load_igm_attenuation_table
 
+mock_version_name = "discowebs1"
+config.mock_version_name = mock_version_name
+
 if __name__ == "__main__":
     # Load data:
     sdss = sdl.load_sdss_wrapper()
@@ -75,6 +78,6 @@ if __name__ == "__main__":
     # Save the best-fit parameters:
     write_param_collection(
         drn_mock="~/calibrated_params",
-        mock_version_name="discowebs1",
+        mock_version_name=config.mock_version_name,
         param_collection=params_bf_bounded,
     )
