@@ -12,7 +12,7 @@ from DisCoWebS.data_loader.param_collection import (
 from DisCoWebS import config
 from DisCoWebS.modelling.igm import load_igm_attenuation_table
 
-mock_version_name = "discowebs1"
+mock_version_name = "discowebs2"
 config.mock_version_name = mock_version_name
 
 if __name__ == "__main__":
@@ -58,21 +58,21 @@ if __name__ == "__main__":
     params_bf_bounded, best_loss = opt1_3d.run_optimization_multi_data(
         data=(sdss, cosmos_web),
         data_mag_colnames=(sdss_mag_colnames, cosmos_web_mag_colnames),
-        N_z_bins=(2, 4),
-        N_host_min=(1200, 1200),
-        N_host_max=(1200, 1200),
+        N_z_bins=(4, 8),
+        N_host_min=(1600, 1600),
+        N_host_max=(1600, 1600),
         n_z_phot_table=(10, 16),
         ssp_data=(ssp_data_sdss, ssp_data_cosmos_web),
         tcurves=(tcurves_sdss, tcurves_cosmos_web),
-        N_mag_bins=(8, 10),
-        N_color_bins=(10, 10),
-        ndsig_by_dbin=0.5,
-        num_loops=4,
-        num_steps_per_loop=4,
+        N_mag_bins=(16, 16),
+        N_color_bins=(20, 20),
+        ndsig_by_dbin=0.2,
+        num_loops=10,
+        num_steps_per_loop=10,
         modes=("fix_diffstarpop_merging", "fix_diffstarpop", "fit_all"),
         data_to_use=("sdss", "cosmos_web"),
         loss_type="log_mse_loss",
-        init_params_bounded=init_params_bounded,
+        # init_params_bounded=init_params_bounded,
     )
 
     # Save the best-fit parameters:

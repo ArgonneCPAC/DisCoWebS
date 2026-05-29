@@ -424,7 +424,7 @@ def bin_cosmos_web_data_m_i_c(
         num_halos = N_host_min + zi * (N_host_max - N_host_min) // (N_z_bins - 1)
         z_min, z_max = z_bins[zi], z_bins[zi + 1]
         lgmp_min = 8.0 + zi * 1.0 / N_z_bins
-        lgmp_max = 13.7 + zi * 0.5 / N_z_bins
+        lgmp_max = 15.0
 
         z_phot_table = np.linspace(z_min, z_max, n_z_phot_table)
 
