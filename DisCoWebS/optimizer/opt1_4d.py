@@ -774,6 +774,15 @@ def run_optimization_1data(
             params_bf_bounded.merging_params,
         )
 
+        # Save the best-fit parameters:
+        write_param_collection(
+            drn_mock="~/calibrated_params",
+            mock_version_name=config.mock_version_name + "_" + mode + "_4d",
+            param_collection=params_bf_bounded,
+        )
+
+        clear_caches()
+
     return params_bf_bounded, best_loss
 
 
