@@ -108,6 +108,10 @@ def bin_cosmos_data_m_i_c(
         cosmos_subset_cut = cosmos_subset_cut[
             (cosmos_subset_cut[cosmos_mag_colnames[i_i]] < 25.0)
         ]
+        for mi in range(n_mag):
+            cosmos_subset_cut = cosmos_subset_cut[
+                (cosmos_subset_cut[cosmos_mag_colnames[mi]] < 25.0)
+            ]
 
         for mi in range(n_mag):
             if mi <= n_mag - 2:
