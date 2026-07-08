@@ -23,6 +23,8 @@ DisCoWebS/__init__.py
 DisCoWebS/_version.py
 DisCoWebS/config.py
 DisCoWebS/discowebs.py
+DisCoWebS/discowebs1.py
+DisCoWebS/discowebs1_cosmos.py
 DisCoWebS/usr_input.yaml
 DisCoWebS.egg-info/PKG-INFO
 DisCoWebS.egg-info/SOURCES.txt
@@ -75,3 +77,6 @@ DisCoWebS/utils/__init__.py
 DisCoWebS/utils/hist.py
 __pycache__/__init__.cpython-313.pyc
 __pycache__/_version.cpython-313.pyc
+tests/__init__.py
+tests/test_readme.py
+tests/testing_data/__init__.py

@@ -22,5 +22,5 @@ def mse_loss(data, pred):
 def ln_poisson_loss(data, pred, eps):
     data = data + eps
     pred = pred + eps
-    loss = jnp.sum((data * jnp.log(pred) - pred) - gammaln(data + 1.0))
+    loss = -2.0 * jnp.sum((data * jnp.log(pred) - pred) - gammaln(data + 1.0))
     return loss
