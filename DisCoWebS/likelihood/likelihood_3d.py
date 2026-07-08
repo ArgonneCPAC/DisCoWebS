@@ -159,7 +159,7 @@ def bin_cosmos_data_m_i_c(
                 chunk_size=500_000,
             )
 
-            non_zero_indices = np.where((Hist_nD1 >= 1.0) & (Hist_nD2 >= 1.0))
+            non_zero_indices = np.where((Hist_nD1 >= 1.0) | (Hist_nD2 >= 1.0))
             if len(non_zero_indices[0]) <= 1:
                 raise ValueError(
                     f"Data and model histograms don't overlap for z bin {zi}."
@@ -340,7 +340,7 @@ def bin_sdss_data_m_i_c(
                 chunk_size=500_000,
             )
 
-            non_zero_indices = np.where((Hist_nD1 >= 1.0) & (Hist_nD2 >= 1.0))
+            non_zero_indices = np.where((Hist_nD1 >= 1.0) | (Hist_nD2 >= 1.0))
             if len(non_zero_indices[0]) <= 1:
                 raise ValueError(
                     f"Data and model histograms don't overlap for z bin {zi}."
@@ -574,7 +574,7 @@ def bin_cosmos_web_data_m_i_c(
                 chunk_size=500_000,
             )
 
-            non_zero_indices = np.where((Hist_nD1 >= 1.0) & (Hist_nD2 >= 1.0))
+            non_zero_indices = np.where((Hist_nD1 >= 1.0) | (Hist_nD2 >= 1.0))
             if len(non_zero_indices[0]) <= 1:
                 raise ValueError(
                     f"Data and model histograms don't overlap for z bin {zi}."
