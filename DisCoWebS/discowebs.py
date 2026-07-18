@@ -4,7 +4,7 @@ from DisCoWebS.data_loader import cosmos_web_loader as cwl
 from DisCoWebS.data_loader import load_ssp_templates
 from DisCoWebS.data_loader import sdss_filter_select
 from DisCoWebS.data_loader import cosmos_web_filter_select
-from DisCoWebS.optimizer import opt1_3d
+from DisCoWebS.optimizer import opt1_4d
 from DisCoWebS.data_loader.param_collection import (
     load_param_collection,
     write_param_collection,
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     )
 
     # Run optimization:
-    params_bf_bounded, best_loss = opt1_3d.run_optimization_multi_data(
+    params_bf_bounded, best_loss = opt1_4d.run_optimization_multi_data(
         data=(sdss, cosmos_web),
         data_mag_colnames=(sdss_mag_colnames, cosmos_web_mag_colnames),
         N_z_bins=(4, 8),

@@ -804,7 +804,12 @@ def m_i_c_loss(
 
             kk = kk + 1
 
-    return sum_1 / norm
+    if loss_type == "ln_poisson_loss":
+        sum_1_ = sum_1 * 1.0
+    else:
+        sum_1_ = sum_1 / norm
+
+    return sum_1_
 
 
 @partial(
@@ -1095,4 +1100,9 @@ def m_i_c_loss_cosmos_web(
 
             kk = kk + 1
 
-    return sum_1 / norm
+    if loss_type == "ln_poisson_loss":
+        sum_1_ = sum_1 * 1.0
+    else:
+        sum_1_ = sum_1 / norm
+
+    return sum_1_

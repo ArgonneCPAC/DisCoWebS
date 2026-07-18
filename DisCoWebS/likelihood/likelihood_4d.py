@@ -106,11 +106,11 @@ def bin_cosmos_data_m_i_c1_c2(
 
         n_mag = len(cosmos_mag_colnames)
         cosmos_subset_cut = cosmos_subset_cut[
-            (cosmos_subset_cut[cosmos_mag_colnames[i_i]] < 25.5)
+            (cosmos_subset_cut[cosmos_mag_colnames[i_i]] < 25.0)
         ]
         for mi in range(n_mag):
             cosmos_subset_cut = cosmos_subset_cut[
-                (cosmos_subset_cut[cosmos_mag_colnames[mi]] < 25.5)
+                (cosmos_subset_cut[cosmos_mag_colnames[mi]] < 25.0)
             ]
 
         for mi in range(n_mag):
@@ -869,7 +869,12 @@ def m_i_c1_c2_loss(
 
             kk = kk + 1
 
-    return sum_1 / norm
+    if loss_type == "ln_poisson_loss":
+        sum_1_ = sum_1 * 1.0
+    else:
+        sum_1_ = sum_1 / norm
+
+    return sum_1_
 
 
 @partial(
@@ -1166,4 +1171,9 @@ def m_i_c1_c2_loss_cosmos_web(
 
             kk = kk + 1
 
-    return sum_1 / norm
+    if loss_type == "ln_poisson_loss":
+        sum_1_ = sum_1 * 1.0
+    else:
+        sum_1_ = sum_1 / norm
+
+    return sum_1_
