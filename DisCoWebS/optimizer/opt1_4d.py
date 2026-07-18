@@ -729,7 +729,10 @@ def run_optimization_1data(
     norm = init_loss * 1.0
     norm = float(norm)
 
-    print("Initial Loss:  1.00 ")
+    if loss_type == "ln_poisson_loss":
+        print(f"Initial loss: {init_loss:.4f}")
+    else:
+        print("Initial Loss:  1.00 ")
 
     for opt_loop in range(len(modes)):
         mode = modes[opt_loop]
@@ -932,7 +935,10 @@ def run_optimization_multi_data(
     norm = init_loss * 1.0
     norm = float(norm)
 
-    print("Initial Loss:  1.00 ")
+    if loss_type == "ln_poisson_loss":
+        print(f"Initial loss: {init_loss:.4f}")
+    else:
+        print("Initial Loss:  1.00 ")
 
     for opt_loop in range(len(modes)):
         mode = modes[opt_loop]
