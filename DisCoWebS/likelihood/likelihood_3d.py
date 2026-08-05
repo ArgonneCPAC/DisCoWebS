@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 from jax import random as jran
 from diffsky.experimental import lightcone_generators as lcg
-from diffsky.experimental.kernels import gd_phot_kernels_merging as gpkm
+from diffsky.experimental.kernels import phot_kernels as pk
 from dsps.cosmology import DEFAULT_COSMOLOGY
 from diffstar.defaults import FB
 from diffsky import signdhist_lomem
@@ -72,7 +72,7 @@ def bin_cosmos_data_m_i_c(
 
         ran_key, sed_key = jran.split(ran_key, 2)
 
-        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = pk._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
@@ -262,7 +262,7 @@ def bin_sdss_data_m_i_c(
 
         ran_key, sed_key = jran.split(ran_key, 2)
 
-        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = pk._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
@@ -446,7 +446,7 @@ def bin_cosmos_web_data_m_i_c(
 
         ran_key, sed_key = jran.split(ran_key, 2)
 
-        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = pk._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
@@ -729,7 +729,7 @@ def m_i_c_loss(
         lc_data = lc_data_all[zi]
         n_gal = n_gal_all[zi]
 
-        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = pk._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
@@ -1005,7 +1005,7 @@ def m_i_c_loss_cosmos_web(
         lc_data = lc_data_all[zi]
         n_gal = n_gal_all[zi]
 
-        phot_info, phot_randoms, merging_randoms = gpkm._mc_phot_kern_merging(
+        phot_info, phot_randoms, merging_randoms = pk._mc_phot_kern_merging(
             sed_key,
             lc_data.z_obs,
             lc_data.t_obs,
