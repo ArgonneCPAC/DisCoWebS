@@ -562,7 +562,7 @@ def bin_cosmos_web_data_m_i_c(
                 phot_info_data_dropout,
                 edges=edges,
                 occupied_bins=occupied_bins,
-                chunk_size=500_000,
+                chunk_size=400_000,
             )
 
             non_zero_indices = np.where((Hist_nD1 >= 1.0) | (Hist_nD2 >= 1.0))
